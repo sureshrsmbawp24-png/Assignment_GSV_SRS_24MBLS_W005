@@ -7,7 +7,7 @@ filename = r'greencalogistic_regression_model.pkl'
 loaded_model = pickle.load(open(filename, 'rb'))
 
 # Define the correct column names
-columns = ['Exp_biodiversity_landscape_protection__GDP', 'Exp_environment_protection__GDP', 'Exp_environmental_protection_NEC__GDP', 'Exp_on_environmental_protection_R&D__GDP', 'Exp_pollution_abatement__GDP', 'Exp_waste_management__GDP', 'Exp_waste_water_management__GDP', 'Environmental_Taxes__GDP', 'Taxes_Energy__GDP', 'Taxes_Pollution__GDP', 'Taxes_Resources__GDP', 'Taxes_Transport__GDP', 'Carbon_stocks_forests_MT', 'Index_carbon_stocks_forests', 'Index_forest_extent', 'Land_area_1000HA', 'Share_forest_area__', 'Implicit Fossil_Fuel_Subsidies__GDP', 'Explicit_Fossil_Fuel_Subsidies__GDP', 'Renewable_Electricity_Generation_GWh', 'Non-Renewable_Electricity_Generation_GWh']
+columns = ['Exp_biodiversity_landscape_protection__GDP', 'Exp_environment_protection__GDP', 'Exp_environmental_protection_NEC__GDP', 'Exp_on_environmental_protection_R_and_D__GDP', 'Exp_pollution_abatement__GDP', 'Exp_waste_management__GDP', 'Exp_waste_water_management__GDP', 'Environmental_Taxes__GDP', 'Taxes_Energy__GDP', 'Taxes_Pollution__GDP', 'Taxes_Resources__GDP', 'Taxes_Transport__GDP', 'Carbon_stocks_forests_MT', 'Index_carbon_stocks_forests', 'Index_forest_extent', 'Land_area_1000HA', 'Share_forest_area__', 'Implicit Fossil_Fuel_Subsidies__GDP', 'Explicit_Fossil_Fuel_Subsidies__GDP', 'Renewable_Electricity_Generation_GWh', 'Non-Renewable_Electricity_Generation_GWh']
 
 # Define the prediction function
 def predict_comparative_advantage_in_exporting_low_carbon_technologies(features):
@@ -25,7 +25,7 @@ st.write("Please provide the following information:")
 Exp_biodiversity_landscape_protection__GDP = st.number_input("Exp_biodiversity_landscape_protection__GDP", min_value=0.0, max_value=1.1)
 Exp_environment_protection__GDP = st.number_input("Exp_environment_protection__GDP", min_value=0, max_value=4)
 Exp_environmental_protection_NEC__GDP = st.number_input("Exp_environmental_protection_NEC__GDP", min_value=-0.4, max_value=3)
-Exp_on_environmental_protection_R&D__GDP = st.number_input("Exp_on_environmental_protection_R&D__GDP", min_value=0, max_value=0.01)
+Exp_on_environmental_protection_R_and_D__GDP = st.number_input("Exp_on_environmental_protection_R_and_D__GDP", min_value=0, max_value=0.01)
 Exp_pollution_abatement__GDP = st.number_input("Exp_pollution_abatement__GDP", min_value=0, max_value=0.7)
 Exp_waste_management__GDP = st.number_input("Exp_waste_management__GDP", min_value=0, max_value=0.8)
 Exp_waste_water_management__GDP = st.number_input("Exp_waste_water_management__GDP", min_value=-0.1, max_value=0.6)
@@ -45,7 +45,7 @@ Renewable_Electricity_Generation_GWh = st.number_input("Renewable_Electricity_Ge
 Non-Renewable_Electricity_Generation_GWh = st.number_input("Non-Renewable_Electricity_Generation_GWh", min_value=0, max_value=734500)
 
 # Create a dataframe with the user input
-input_data = pd.DataFrame([['Exp_biodiversity_landscape_protection__GDP', 'Exp_environment_protection__GDP', 'Exp_environmental_protection_NEC__GDP', 'Exp_on_environmental_protection_R&D__GDP', 'Exp_pollution_abatement__GDP', 'Exp_waste_management__GDP', 'Exp_waste_water_management__GDP', 'Environmental_Taxes__GDP', 'Taxes_Energy__GDP', 'Taxes_Pollution__GDP', 'Taxes_Resources__GDP', 'Taxes_Transport__GDP', 'Carbon_stocks_forests_MT', 'Index_carbon_stocks_forests', 'Index_forest_extent', 'Land_area_1000HA', 'Share_forest_area__', 'Implicit Fossil_Fuel_Subsidies__GDP', 'Explicit_Fossil_Fuel_Subsidies__GDP', 'Renewable_Electricity_Generation_GWh', 'Non-Renewable_Electricity_Generation_GWh']], columns=columns)
+input_data = pd.DataFrame([['Exp_biodiversity_landscape_protection__GDP', 'Exp_environment_protection__GDP', 'Exp_environmental_protection_NEC__GDP', 'Exp_on_environmental_protection_R_and_D__GDP', 'Exp_pollution_abatement__GDP', 'Exp_waste_management__GDP', 'Exp_waste_water_management__GDP', 'Environmental_Taxes__GDP', 'Taxes_Energy__GDP', 'Taxes_Pollution__GDP', 'Taxes_Resources__GDP', 'Taxes_Transport__GDP', 'Carbon_stocks_forests_MT', 'Index_carbon_stocks_forests', 'Index_forest_extent', 'Land_area_1000HA', 'Share_forest_area__', 'Implicit Fossil_Fuel_Subsidies__GDP', 'Explicit_Fossil_Fuel_Subsidies__GDP', 'Renewable_Electricity_Generation_GWh', 'Non-Renewable_Electricity_Generation_GWh']], columns=columns)
 
 # Make a prediction
 # Make a prediction
