@@ -4,7 +4,6 @@ import pickle
 import os
 
 # --- 1. Load the trained model ---
-# Added error handling in case the file is missing
 filename = 'greencalogistic_regression_model.pkl'
 
 try:
@@ -14,14 +13,13 @@ except FileNotFoundError:
     st.error(f"Error: The file '{filename}' was not found. Please ensure it is in the same directory as this script.")
     st.stop()
 
-# --- 2. Define the exact column names expected by the model ---
-# We have restored special characters like '%' and '&' here because
-# the TRAINED MODEL likely expects these specific strings.
-columns = [
-    'Exp_biodiversity_landscape_protection_%GDP',  # Restored %
+# --- 2. Define the descriptive column names (for mapping inputs) ---
+# This list defines the keys used in input_data_dict and ensures the correct order.
+descriptive_columns = [
+    'Exp_biodiversity_landscape_protection_%GDP',
     'Exp_environment_protection__GDP', 
     'Exp_environmental_protection_NEC__GDP', 
-    'Exp_on_environmental_protection_R&D__GDP',    # Restored &
+    'Exp_on_environmental_protection_R&D__GDP',
     'Exp_pollution_abatement__GDP', 
     'Exp_waste_management__GDP', 
     'Exp_waste_water_management__GDP', 
@@ -41,20 +39,48 @@ columns = [
     'Non-Renewable_Electricity_Generation_GWh'
 ]
 
-# --- 3. Define the prediction function ---
+# --- 3. Define the ID column names (as expected by the model) ---
+# This list must match the order of the descriptive_columns list above, 
+# based on the table provided in the user's image.
+model_feature_ids = [
+    'EP_0',  # Exp_biodiversity_landscape_protection_%GDP
+    'EP_1',  # Exp_environment_protection__GDP
+    'EP_2',  # Exp_environmental_protection_NEC__GDP
+    'EP_3',  # Exp_on_environmental_protection_R&D__GDP
+    'EP_4',  # Exp_pollution_abatement__GDP
+    'EP_5',  # Exp_waste_management__GDP
+    'EP_6',  # Exp_waste_water_management__GDP
+    'ET_0',  # Environmental_Taxes__GDP
+    'ET_1',  # Taxes_Energy__GDP
+    'ET_2',  # Taxes_Pollution__GDP
+    'ET_3',  # Taxes_Resources__GDP
+    'ET_4',  # Taxes_Transport__GDP
+    'FC_0',  # Carbon_stocks_forests_MT
+    'FC_2',  # Index_carbon_stocks_forests
+    'FC_3',  # Index_forest_extent
+    'FC_4',  # Land_area_1000HA
+    'FC_5',  # Share_forest_area__
+    'FF_0',  # Implicit Fossil_Fuel_Subsidies__GDP
+    'FF_1',  # Explicit_Fossil_Fuel_Subsidies__GDP
+    'RE_0_0',  # Renewable_Electricity_Generation_GWh
+    'RE_0_1'   # Non-Renewable_Electricity_Generation_GWh
+]
+
+
+# --- 4. Define the prediction function (now simpler) ---
 def predict_comparative_advantage(features):
     """
     Predicts the comparative_advantage based on input features.
     """
+    # The columns are already renamed outside this function, making this call safe.
     prediction = loaded_model.predict(features)
     return prediction
 
-# --- 4. Create the Streamlit app ---
+# --- 5. Create the Streamlit app ---
 st.title("Low Carbon Tech Comparative Advantage Prediction")
 st.write("Please provide the following information (ranges are shown in parentheses):")
 
-# --- 5. Get user input ---
-# Added (Min: X, Max: Y) to every label for clarity.
+# --- 6. Get user input (Variable names are clean, labels show ranges) ---
 
 Exp_biodiversity_landscape_protection__GDP = st.number_input(
     "Exp_biodiversity_landscape_protection_%GDP (Min: 0.0, Max: 1.1)", 
@@ -161,14 +187,13 @@ Non_Renewable_Electricity_Generation_GWh = st.number_input(
     min_value=0.0, max_value=734500.0
 )
 
-# --- 6. Create a dataframe with the user input ---
-# MAPPING: Map the clean Python variables (values) to the DIRTY/ORIGINAL column names (keys)
-# This ensures the model receives the exact strings it was trained on (e.g., with "R&D" and "%").
+# --- 7. Create and prepare DataFrame for model ---
+# MAPPING: Map the clean Python variables (values) to the DESCRIPTIVE column names (keys)
 input_data_dict = {
-    'Exp_biodiversity_landscape_protection_%GDP': Exp_biodiversity_landscape_protection__GDP, # Key restored to %
+    'Exp_biodiversity_landscape_protection_%GDP': Exp_biodiversity_landscape_protection__GDP,
     'Exp_environment_protection__GDP': Exp_environment_protection__GDP,
     'Exp_environmental_protection_NEC__GDP': Exp_environmental_protection_NEC__GDP,
-    'Exp_on_environmental_protection_R&D__GDP': Exp_on_environmental_protection_R_and_D__GDP, # Key restored to &
+    'Exp_on_environmental_protection_R&D__GDP': Exp_on_environmental_protection_R_and_D__GDP,
     'Exp_pollution_abatement__GDP': Exp_pollution_abatement__GDP,
     'Exp_waste_management__GDP': Exp_waste_management__GDP,
     'Exp_waste_water_management__GDP': Exp_waste_water_management__GDP,
@@ -188,18 +213,21 @@ input_data_dict = {
     'Non-Renewable_Electricity_Generation_GWh': Non_Renewable_Electricity_Generation_GWh
 }
 
-# Create DataFrame
+# Create DataFrame and ensure the order matches the model_feature_ids list
 input_df = pd.DataFrame([input_data_dict])
 
-# Ensure columns are in the exact order the model expects
-# If 'columns' list above has typos, this line will filter out data, so we double-check.
+# CRITICAL FIX: Reorder the DataFrame columns using the descriptive names list
 try:
-    input_df = input_df[columns]
+    input_df = input_df[descriptive_columns]
 except KeyError as e:
-    st.error(f"Key Error: The code is trying to find a column that doesn't exist in the dictionary. Details: {e}")
+    st.error(f"Internal Error: A descriptive column name is incorrect. Details: {e}")
     st.stop()
 
-# --- 7. Make a prediction ---
+# CRITICAL FIX: Rename the columns to the short IDs the model expects
+input_df.columns = model_feature_ids
+
+
+# --- 8. Make a prediction ---
 if st.button("Predict Comparative Advantage"):
     try:
         prediction = predict_comparative_advantage(input_df)
@@ -211,12 +239,5 @@ if st.button("Predict Comparative Advantage"):
             st.success("High Comparative Advantage (1)")
             
     except ValueError as e:
-        # This catches the specific error you were seeing (feature mismatch)
-        st.error("Error: Feature Name Mismatch.")
-        st.write("The model expects specific column names that don't match the inputs.")
+        st.error("Error: An unexpected error occurred during prediction. Check the data inputs.")
         st.write(f"Technical details: {e}")
-        
-        # DEBUG HELPER: Print what the model actually wants
-        if hasattr(loaded_model, 'feature_names_in_'):
-            st.warning("The model was trained with these exact feature names. Please verify your code uses these:")
-            st.write(loaded_model.feature_names_in_)
